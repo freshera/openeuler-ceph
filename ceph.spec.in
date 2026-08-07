@@ -246,7 +246,13 @@ BuildRequires:	grpc-devel
 # gcc bug https://bugzilla.redhat.com/show_bug.cgi?id=2241339
 # for details.
 %if 0%{?gts_version} == 0
+###########################################################
+%if !0%{?openEuler}
 BuildRequires:	gcc-c++ >= 13.3
+%else
+BuildRequires:	gcc-c++ >= 12.3
+%endif
+###########################################################
 %else
 BuildRequires:	gcc-toolset-%{gts_version}-gcc-c++ >= 13.3
 BuildRequires:	gcc-toolset-%{gts_version}-runtime
@@ -325,7 +331,11 @@ BuildRequires:	python%{python3_pkgversion}-dateutil
 BuildRequires:	python%{python3_pkgversion}-coverage
 BuildRequires:	python%{python3_pkgversion}-pyOpenSSL
 BuildRequires:	socat
+###########################################################
+%if !0%{?openEuler}
 BuildRequires:	python%{python3_pkgversion}-asyncssh
+%endif
+###########################################################
 BuildRequires:	python%{python3_pkgversion}-natsort
 %endif
 %if 0%{?suse_version}
@@ -409,7 +419,11 @@ BuildRequires:  rdma-core-devel
 BuildRequires:	liblz4-devel >= 1.7
 # for prometheus-alerts
 BuildRequires:  golang-github-prometheus-prometheus
+###########################################################
+%if !0%{?openEuler}
 BuildRequires:	jsonnet
+%endif
+###########################################################
 %endif
 %if 0%{?fedora} || 0%{?rhel} || 0%{?openEuler}
 Requires:	systemd
@@ -449,7 +463,11 @@ BuildRequires:	python%{python3_pkgversion}-routes
 BuildRequires:	python%{python3_pkgversion}-scipy
 BuildRequires:	python%{python3_pkgversion}-pyOpenSSL
 %endif
+###########################################################
+%if !0%{?openEuler}
 BuildRequires:	jsonnet
+%endif
+###########################################################
 %if 0%{?suse_version}
 BuildRequires:	golang-github-prometheus-prometheus
 BuildRequires:	libxmlsec1-1
@@ -771,7 +789,11 @@ BuildArch:	noarch
 Group:          System/Filesystems
 %endif
 Requires:       ceph-mgr = %{_epoch_prefix}%{version}-%{release}
-Requires:       python%{python3_pkgversion}-asyncssh
+###########################################################
+%if !0%{?openEuler}
+BuildRequires:	python%{python3_pkgversion}-asyncssh
+%endif
+###########################################################
 Requires:       python%{python3_pkgversion}-natsort
 Requires:       cephadm = %{_epoch_prefix}%{version}-%{release}
 %if 0%{?suse_version}
