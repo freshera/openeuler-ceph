@@ -3,8 +3,12 @@
 ##############################################
 
 # 安装基础包
+dnf install -y git g++ python3 python3-devel python3-pip rpm-build npm
 dnf update -y
-dnf install -y git g++ python3-devel python3-pip
+
+
+# 解决openeuler没有python命令的问题
+ln -s /usr/bin/python3 /usr/bin/python
 
 # 设置github代理
 export http_proxy=http://22.129.24.90:10808
@@ -39,8 +43,34 @@ chmod a+x make-dist
 ./install-deps.sh
 
 
-# 解决openeuler没有python命令的问题
-ln -s /usr/bin/python3 /usr/bin/python
+# 使用cmake编译
+export http_proxy=http://22.129.24.90:10808
+export https_proxy=http://22.129.24.90:10808
+rm -rf build
+./do_cmake.sh
+
+# 源码编译和安装
+cd build
+ninja -j64
+ninja install
+
+# 编译出rpm包
+cd ../
+rm -rf ceph-srpm
+cp -r openeuler-ceph ceph-srpm
+cd ceph-srpm
+export http_proxy=http://22.129.24.90:10808
+export https_proxy=http://22.129.24.90:10808
+./make-srpm.sh v20.3.2
+
+# 编译出rpm安装包
+rm -rf /root/rpmbuild/*
+mkdir -p /root/rpmbuild/{SPECS,SOURCES}
+cp ceph-v20.3.2.tar.bz2  /root/rpmbuild/SOURCES
+cp ceph.spec  /root/rpmbuild/SPECS
+export http_proxy=http://22.129.24.90:10808
+export https_proxy=http://22.129.24.90:10808
+rpmbuild -ba /root/rpmbuild/SPECS/ceph.spec
 
 #####################################################
 # run-make-check开发人员用来做完整编译 + 单元测试 + 格式检查
@@ -49,15 +79,4 @@ ln -s /usr/bin/python3 /usr/bin/python
 export http_proxy=http://22.129.24.90:10808
 export https_proxy=http://22.129.24.90:10808
 rm -rf build
-JOBS=64 CHECK_MAKEOPTS="-j64" ./run-make-check.sh
-
-
-# 使用cmake编译
-export http_proxy=http://22.129.24.90:10808
-export https_proxy=http://22.129.24.90:10808
-./do_cmake.sh
-
-# 编译出rpm包
-export http_proxy=http://22.129.24.90:10808
-export https_proxy=http://22.129.24.90:10808
-./make-srpm.sh v20.3.2
+./run-make-check.sh

@@ -1444,6 +1444,13 @@ cmake .. \
     -DCMAKE_C_COMPILER=gcc-11 \
     -DCMAKE_CXX_COMPILER=g++-11 \
 %endif
+%if 0%{?openEuler}
+    -DCMAKE_C_COMPILER=gcc \
+    -DCMAKE_CXX_COMPILER=g++ \
+    -DWITH_SPDK:BOOL=ON \
+    -DWITH_NVMEF:BOOL=ON \
+    -DWITH_CRIMSON:BOOL=OFF \
+%endif
 %if 0%{?gts_version} == 13
     -DCMAKE_EXE_LINKER_FLAGS=-lstdc++ \
 %endif
@@ -1624,7 +1631,10 @@ install -m 0644 -D udev/50-rbd.rules %{buildroot}%{_udevrulesdir}/50-rbd.rules
 # sudoers.d
 install -m 0440 -D sudoers.d/ceph-smartctl %{buildroot}%{_sysconfdir}/sudoers.d/ceph-smartctl
 
-%if 0%{?rhel} >= 8 || 0%{?openEuler}
+############################################
+#%if 0%{?rhel} >= 8 || 0%{?openEuler}
+%if 0%{?rhel} >= 8
+############################################
 %{py3_shebang_fix} %{buildroot}%{_bindir}/* %{buildroot}%{_sbindir}/*
 %endif
 
