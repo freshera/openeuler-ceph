@@ -10,7 +10,7 @@ macro(build_spdk)
     find_package(uuid REQUIRED)
   endif()
   include(FindMake)
-  find_make("_MY_MAKE_BIN" "make_cmd")
+  find_make("MAKE_EXECUTABLE" "make_cmd")
 
   set(spdk_CFLAGS "-fPIC")
   include(CheckCCompilerFlag)
@@ -55,7 +55,7 @@ macro(build_spdk)
     # unset $CFLAGS, otherwise it will interfere with how SPDK sets
     # its include directory.
     # unset $LDFLAGS, otherwise SPDK will fail to mock some functions.
-    BUILD_COMMAND env -i PATH=$ENV{PATH} CC=${CMAKE_C_COMPILER} ${make_cmd} EXTRA_CFLAGS=${spdk_CFLAGS}
+    BUILD_COMMAND env -i PATH=$ENV{PATH} CC=${CMAKE_C_COMPILER} make EXTRA_CFLAGS=${spdk_CFLAGS}
     BUILD_IN_SOURCE 1
     BUILD_BYPRODUCTS ${spdk_libs}
     INSTALL_COMMAND ""
