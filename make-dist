@@ -19,6 +19,27 @@ if [[ "$BASEDIR" == *:* ]] ; then
     exit 1
 fi
 
+# ---------------------------------------------------------------------------
+# Optional knobs (override on the command line, e.g. SKIP_PMDK=0 ./make-dist ...)
+#
+# Defaults match a lean local/RPM build (see do_cmake.sh):
+#   -DWITH_MGR_DASHBOARD_FRONTEND=OFF  -> skip npm dashboard (biggest time sink)
+#   -DWITH_BLUESTORE_PMEM=OFF / no RWL -> skip bundling PMDK
+# Boost is still required (system openEuler Boost is often < 1.87).
+# liburing stays bundled unless you use -DWITH_SYSTEM_LIBURING=ON in cmake/spec.
+#
+# CACHE_DIR: successful downloads are stored here and reused when SHA256 matches,
+# so repeated make-dist runs do not re-wget Boost/liburing/pmdk.
+# ---------------------------------------------------------------------------
+: "${SKIP_DASHBOARD_FRONTEND:=1}"
+: "${SKIP_PMDK:=1}"
+: "${SKIP_LIBURING:=0}"
+: "${SKIP_ROOK_CLIENT:=0}"
+# Set to 1 only when submodules are already initialized and unchanged.
+: "${SKIP_SUBMODULE_UPDATE:=0}"
+: "${CACHE_DIR:=${HOME}/.cache/ceph-make-dist}"
+mkdir -p "$CACHE_DIR"
+
 version=$1
 [ -z "$version" ] && version=$(git describe --long --match 'v*' | sed 's/^v//')
 if expr index $version '-' > /dev/null; then
@@ -31,29 +52,45 @@ fi
 
 outfile="ceph-$version"
 echo "version $version"
+echo "make-dist options: SKIP_DASHBOARD_FRONTEND=$SKIP_DASHBOARD_FRONTEND SKIP_PMDK=$SKIP_PMDK SKIP_LIBURING=$SKIP_LIBURING SKIP_ROOK_CLIENT=$SKIP_ROOK_CLIENT SKIP_SUBMODULE_UPDATE=$SKIP_SUBMODULE_UPDATE"
+echo "download cache: $CACHE_DIR"
 
 # update submodules
-echo "updating submodules..."
-force=$(if git submodule usage 2>&1 | grep --quiet 'update.*--force'; then echo --force ; fi)
-quiet_or_progress=$(if test -n "$JENKINS_URL"; then echo --quiet; else echo --progress; fi)
-if ! git submodule sync || ! git submodule update $force --init --recursive $quiet_or_progress; then
-    echo "Error: could not initialize submodule projects"
-    echo "  Network connectivity might be required."
-    exit 1
+if [ "$SKIP_SUBMODULE_UPDATE" = 1 ]; then
+    echo "skipping submodule update (SKIP_SUBMODULE_UPDATE=1)"
+else
+    echo "updating submodules..."
+    force=$(if git submodule usage 2>&1 | grep --quiet 'update.*--force'; then echo --force ; fi)
+    quiet_or_progress=$(if test -n "$JENKINS_URL"; then echo --quiet; else echo --progress; fi)
+    if ! git submodule sync || ! git submodule update $force --init --recursive $quiet_or_progress; then
+        echo "Error: could not initialize submodule projects"
+        echo "  Network connectivity might be required."
+        exit 1
+    fi
 fi
 
+# Download fname from mirror list; reuse CACHE_DIR copy when SHA256 matches.
 download_from() {
-    fname=$1
+    local fname=$1
     shift
-    sha256=$1
+    local sha256=$1
     shift
+    local cache_file="$CACHE_DIR/$fname"
+    local url_base url
+
+    if [ -f "$cache_file" ] && [ "$(sha256sum "$cache_file" | awk '{print $1}')" = "$sha256" ]; then
+        echo "cache hit: $fname"
+        cp -a "$cache_file" "$fname"
+        return 0
+    fi
+
     set +e
     while true; do
         url_base=$1
         shift
-        if [ -z $url_base ]; then
+        if [ -z "$url_base" ]; then
             echo "Error: failed to download $fname."
-            exit
+            exit 1
         fi
         url=$url_base/$fname
         wget --no-verbose -O $fname $url
@@ -62,6 +99,8 @@ download_from() {
         elif [ $(sha256sum $fname | awk '{print $1}') != $sha256 ]; then
             echo "Error: failed to download $fname: SHA256 mismatch."
         else
+            cp -a "$fname" "$cache_file"
+            echo "cached: $fname -> $cache_file"
             break
         fi
     done
@@ -190,27 +229,54 @@ for spec in ceph.spec.in; do
 done
 ln -s . $outfile
 tar cvf $outfile.version.tar $outfile/src/.git_version $outfile/ceph.spec
+
+# Component tarballs concatenated in upstream order:
+#   version, boost, [liburing], [pmdk], [dashboard], [rook], git-archive
+ordered_tarballs=("$outfile.version")
+
 # NOTE: If you change this version number make sure the package is available
 # at the three URLs referenced below (may involve uploading to download.ceph.com)
 boost_version=1.87.0
 download_boost $boost_version af57be25cb4c4f4b413ed692fe378affb4352ea50fbe294a11ef548f4d527d89 \
                https://download.ceph.com/qa \
                https://archives.boost.io/release/$boost_version/source
-download_liburing 2.5 456f5f882165630f0dc7b75e8fd53bd01a955d5d4720729b4323097e6e9f2a98 \
-                  https://github.com/axboe/liburing/archive \
-                  https://git.kernel.dk/cgit/liburing/snapshot
-pmdk_version=1.10
-download_pmdk $pmdk_version 08dafcf94db5ac13fac9139c92225d9aa5f3724ea74beee4e6ca19a01a2eb20c \
-               https://github.com/pmem/pmdk/releases/download/$pmdk_version
-build_dashboard_frontend
-generate_rook_ceph_client
-for tarball in $outfile.version   \
-               $outfile.boost     \
-               $outfile.liburing  \
-               $outfile.pmdk  \
-               dashboard_frontend \
-               rook_ceph_client   \
-               $outfile; do
+ordered_tarballs+=("$outfile.boost")
+
+if [ "$SKIP_LIBURING" = 1 ]; then
+    echo "skipping liburing download (SKIP_LIBURING=1); use -DWITH_SYSTEM_LIBURING=ON when building"
+else
+    download_liburing 2.5 456f5f882165630f0dc7b75e8fd53bd01a955d5d4720729b4323097e6e9f2a98 \
+                      https://github.com/axboe/liburing/archive \
+                      https://git.kernel.dk/cgit/liburing/snapshot
+    ordered_tarballs+=("$outfile.liburing")
+fi
+
+if [ "$SKIP_PMDK" = 1 ]; then
+    echo "skipping PMDK download (SKIP_PMDK=1); fine when WITH_BLUESTORE_PMEM/RBD_RWL are OFF"
+else
+    pmdk_version=1.10
+    download_pmdk $pmdk_version 08dafcf94db5ac13fac9139c92225d9aa5f3724ea74beee4e6ca19a01a2eb20c \
+                   https://github.com/pmem/pmdk/releases/download/$pmdk_version
+    ordered_tarballs+=("$outfile.pmdk")
+fi
+
+if [ "$SKIP_DASHBOARD_FRONTEND" = 1 ]; then
+    echo "skipping dashboard frontend build (SKIP_DASHBOARD_FRONTEND=1); matches WITH_MGR_DASHBOARD_FRONTEND=OFF"
+else
+    build_dashboard_frontend
+    ordered_tarballs+=(dashboard_frontend)
+fi
+
+if [ "$SKIP_ROOK_CLIENT" = 1 ]; then
+    echo "skipping rook ceph client generation (SKIP_ROOK_CLIENT=1)"
+else
+    generate_rook_ceph_client
+    ordered_tarballs+=(rook_ceph_client)
+fi
+
+ordered_tarballs+=("$outfile")
+
+for tarball in "${ordered_tarballs[@]}"; do
     tar --concatenate -f $outfile.all.tar $tarball.tar
     rm $tarball.tar
 done
@@ -221,3 +287,5 @@ echo "compressing..."
 bzip2 -9 $outfile.tar
 
 echo "done."
+echo "created: $outfile.tar.bz2"
+echo "hint: full upstream bundle: SKIP_DASHBOARD_FRONTEND=0 SKIP_PMDK=0 ./make-dist $version"
