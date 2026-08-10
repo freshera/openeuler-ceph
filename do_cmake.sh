@@ -92,6 +92,7 @@ for i in $(seq 20 -1 11); do
 done
 ARGS+=" -DCMAKE_CXX_COMPILER=$cxx_compiler"
 ARGS+=" -DCMAKE_C_COMPILER=$c_compiler"
+ARGS+=" -DWITH_NVMEOF_GATEWAY_MONITOR_CLIENT=ON"
 
 mkdir $BUILD_DIR
 cd $BUILD_DIR
