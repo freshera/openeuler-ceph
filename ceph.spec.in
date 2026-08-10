@@ -251,6 +251,7 @@ BuildRequires:	grpc-devel
 BuildRequires:	gcc-c++ >= 13.3
 %else
 BuildRequires:	gcc-c++ >= 12.3
+BuildRequires:	protobuf-devel
 %endif
 ###########################################################
 %else
@@ -1450,6 +1451,9 @@ cmake .. \
     -DWITH_SPDK:BOOL=ON \
     -DWITH_NVMEF:BOOL=ON \
     -DWITH_CRIMSON:BOOL=OFF \
+    -DgRPC_DIR=/opt/grpc/lib64/cmake/grpc \
+    -DCMAKE_PREFIX_PATH=/opt/grpc \
+    -DWITH_NVMEOF_GATEWAY_MONITOR_CLIENT=ON \
 %endif
 %if 0%{?gts_version} == 13
     -DCMAKE_EXE_LINKER_FLAGS=-lstdc++ \
