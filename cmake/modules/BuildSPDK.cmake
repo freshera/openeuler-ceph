@@ -12,7 +12,10 @@ macro(build_spdk)
   include(FindMake)
   find_make("MAKE_EXECUTABLE" "make_cmd")
 
-  set(spdk_CFLAGS "-fPIC")
+  # -Wno-error=format-security: rpmbuild injects -Werror=format-security via
+  # RPM_OPT_FLAGS; SPDK's spdk_top uses mvprintw(win, row, col, var) which
+  # then fails the ExternalProject build even though Ceph only needs SPDK libs.
+  set(spdk_CFLAGS "-fPIC -Wno-error=format-security")
   include(CheckCCompilerFlag)
   check_c_compiler_flag("-Wno-address-of-packed-member" HAVE_WARNING_ADDRESS_OF_PACKED_MEMBER)
   if(HAVE_WARNING_ADDRESS_OF_PACKED_MEMBER)
@@ -47,7 +50,10 @@ macro(build_spdk)
   ExternalProject_Add(spdk-ext
     DEPENDS dpdk-ext
     SOURCE_DIR ${source_dir}
-    CONFIGURE_COMMAND ./configure
+    # Clear RPM/cmake env CFLAGS during configure so -Werror=format-security
+    # from RPM_OPT_FLAGS is not baked into SPDK's config.mk.
+    CONFIGURE_COMMAND env -i PATH=$ENV{PATH} CC=${CMAKE_C_COMPILER}
+      ./configure
       --with-dpdk=${DPDK_DIR}
       --without-isal
       --without-vhost
