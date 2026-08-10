@@ -1456,13 +1456,13 @@ env | sort
 # TODO: drop this step once we can use `cmake -B`
 mkdir -p %{_vpath_builddir}
 pushd %{_vpath_builddir}
+# openEuler flags below must stay in sync with do_cmake.sh (no # comments inside cmake \ continuations)
 cmake .. \
 %if 0%{?suse_version} == 1500
     -DCMAKE_C_COMPILER=gcc-11 \
     -DCMAKE_CXX_COMPILER=g++-11 \
 %endif
 %if 0%{?openEuler}
-    # Keep in sync with do_cmake.sh lean options
     -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \

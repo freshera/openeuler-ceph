@@ -50,9 +50,9 @@ macro(build_spdk)
   ExternalProject_Add(spdk-ext
     DEPENDS dpdk-ext
     SOURCE_DIR ${source_dir}
-    # Clear RPM/cmake env CFLAGS during configure so -Werror=format-security
-    # from RPM_OPT_FLAGS is not baked into SPDK's config.mk.
-    CONFIGURE_COMMAND env -i PATH=$ENV{PATH} CC=${CMAKE_C_COMPILER}
+    # Do not inherit RPM_OPT_FLAGS (-Werror=format-security) into SPDK configure.
+    # Use env -i (not cmake -E env --unset) for CMake 3.16 compatibility.
+    CONFIGURE_COMMAND env -i "PATH=$ENV{PATH}" "CC=${CMAKE_C_COMPILER}"
       ./configure
       --with-dpdk=${DPDK_DIR}
       --without-isal
@@ -61,7 +61,9 @@ macro(build_spdk)
     # unset $CFLAGS, otherwise it will interfere with how SPDK sets
     # its include directory.
     # unset $LDFLAGS, otherwise SPDK will fail to mock some functions.
-    BUILD_COMMAND env -i PATH=$ENV{PATH} CC=${CMAKE_C_COMPILER} make EXTRA_CFLAGS=${spdk_CFLAGS}
+    # Quote EXTRA_CFLAGS so multiple -W flags remain a single make argument.
+    BUILD_COMMAND env -i "PATH=$ENV{PATH}" "CC=${CMAKE_C_COMPILER}"
+      make "EXTRA_CFLAGS=${spdk_CFLAGS}"
     BUILD_IN_SOURCE 1
     BUILD_BYPRODUCTS ${spdk_libs}
     INSTALL_COMMAND ""
