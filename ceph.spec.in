@@ -250,7 +250,7 @@ BuildRequires:	gperf
 BuildRequires:  cmake > 3.5
 BuildRequires:	fuse-devel
 BuildRequires:	git
-BuildRequires:	grpc-devel
+#BuildRequires:	grpc-devel
 # Before 13.3, an lto bug resulted in a segfault in SafeTimer and perhaps
 # elsewhere. Require the fixed version so we can reenable lto. See
 # ceph bug https://tracker.ceph.com/issues/63867
@@ -264,6 +264,7 @@ BuildRequires:	gcc-c++ >= 13.3
 %else
 BuildRequires:	gcc-c++ >= 12.3
 BuildRequires:	protobuf-devel
+BuildRequires:	protobuf-lite-devel
 %endif
 ###########################################################
 %else
