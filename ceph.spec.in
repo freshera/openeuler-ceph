@@ -1978,6 +1978,8 @@ fi
 %{_datadir}/ceph/mgr/mgr_util.*
 %{_datadir}/ceph/mgr/object_format.*
 %{_datadir}/ceph/mgr/cherrypy_mgr.*
+# brp-python-bytecompile creates these next to the top-level mgr modules
+%{_datadir}/ceph/mgr/__pycache__/
 %{_unitdir}/ceph-mgr@.service
 %{_unitdir}/ceph-mgr.target
 %attr(750,ceph,ceph) %dir %{_localstatedir}/lib/ceph/mgr
