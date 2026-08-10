@@ -92,6 +92,7 @@ for i in $(seq 20 -1 11); do
 done
 ARGS+=" -DCMAKE_CXX_COMPILER=$cxx_compiler"
 ARGS+=" -DCMAKE_C_COMPILER=$c_compiler"
+# Keep in sync with ceph.spec.in %if 0%{?openEuler} cmake args / bconds
 ARGS+=" -DWITH_NVMEOF_GATEWAY_MONITOR_CLIENT=ON"
 ARGS+=" -DWITH_MGR_DASHBOARD_FRONTEND=OFF"
 ARGS+=" -DWITH_TESTS=OFF"
@@ -101,7 +102,6 @@ ARGS+=" -DWITH_BABELTRACE=OFF"
 ARGS+=" -DWITH_MANPAGE=OFF"
 ARGS+=" -DCMAKE_BUILD_TYPE=RelWithDebInfo"
 ARGS+=" -DWITH_SPDK=ON"
-ARGS+=" -DWITH_NVMEF=ON"
 ARGS+=" -DWITH_CRIMSON=OFF"
 ARGS+=" -DgRPC_DIR=/opt/grpc/lib64/cmake/grpc"
 ARGS+=" -DCMAKE_PREFIX_PATH=/opt/grpc"

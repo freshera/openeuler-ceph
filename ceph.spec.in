@@ -22,7 +22,14 @@
 #################################################################################
 %bcond_with make_check
 %bcond_with cmake_verbose_logging
+# openEuler lean build (aligned with do_cmake.sh): skip ceph-test by default
+%if 0%{?openEuler}
+%bcond_with ceph_test_package
+%bcond_with manpage
+%else
 %bcond_without ceph_test_package
+%bcond_without manpage
+%endif
 %ifarch s390
 %bcond_with tcmalloc
 %else
@@ -47,7 +54,12 @@
 %bcond_without selinux
 %bcond_without amqp_endpoint
 %bcond_without kafka_endpoint
+# openEuler: LTTNG/BABELTRACE off by default (matches do_cmake.sh)
+%if 0%{?openEuler}
+%bcond_with lttng
+%else
 %bcond_without lttng
+%endif
 %bcond_without libradosstriper
 %bcond_without ocf
 %global luarocks_package_name luarocks
@@ -415,7 +427,9 @@ BuildRequires:  openldap2-devel
 BuildRequires:  cunit-devel
 BuildRequires:	python%{python3_pkgversion}-PrettyTable
 BuildRequires:	python%{python3_pkgversion}-PyYAML
+%if 0%{with manpage}
 BuildRequires:	python%{python3_pkgversion}-Sphinx
+%endif
 BuildRequires:  rdma-core-devel
 BuildRequires:	liblz4-devel >= 1.7
 # for prometheus-alerts
@@ -443,7 +457,9 @@ BuildRequires:  CUnit-devel
 BuildRequires:	python%{python3_pkgversion}-devel
 BuildRequires:	python%{python3_pkgversion}-prettytable
 BuildRequires:	python%{python3_pkgversion}-pyyaml
+%if 0%{with manpage}
 BuildRequires:	python%{python3_pkgversion}-sphinx
+%endif
 BuildRequires:	lz4-devel >= 1.7
 %endif
 # distro-conditional make check dependencies
@@ -1446,14 +1462,16 @@ cmake .. \
     -DCMAKE_CXX_COMPILER=g++-11 \
 %endif
 %if 0%{?openEuler}
+    # Keep in sync with do_cmake.sh lean options
     -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DWITH_SPDK:BOOL=ON \
-    -DWITH_NVMEF:BOOL=ON \
     -DWITH_CRIMSON:BOOL=OFF \
     -DgRPC_DIR=/opt/grpc/lib64/cmake/grpc \
     -DCMAKE_PREFIX_PATH=/opt/grpc \
     -DWITH_NVMEOF_GATEWAY_MONITOR_CLIENT=ON \
+    -DWITH_JAEGER:BOOL=OFF \
 %endif
 %if 0%{?gts_version} == 13
     -DCMAKE_EXE_LINKER_FLAGS=-lstdc++ \
@@ -1463,11 +1481,17 @@ cmake .. \
     -DCMAKE_INSTALL_LIBEXECDIR:PATH=%{_libexecdir} \
     -DCMAKE_INSTALL_LOCALSTATEDIR:PATH=%{_localstatedir} \
     -DCMAKE_INSTALL_SYSCONFDIR:PATH=%{_sysconfdir} \
+%if 0%{with manpage}
     -DCMAKE_INSTALL_MANDIR:PATH=%{_mandir} \
+%endif
     -DCMAKE_INSTALL_DOCDIR:PATH=%{_docdir}/ceph \
     -DCMAKE_INSTALL_INCLUDEDIR:PATH=%{_includedir} \
     -DSYSTEMD_SYSTEM_UNIT_DIR:PATH=%{_unitdir} \
+%if 0%{with manpage}
     -DWITH_MANPAGE:BOOL=ON \
+%else
+    -DWITH_MANPAGE:BOOL=OFF \
+%endif
     -DWITH_PYTHON3:STRING=%{python3_version} \
     -DWITH_MGR_DASHBOARD_FRONTEND:BOOL=OFF \
 %if 0%{?suse_version}
@@ -1728,12 +1752,14 @@ rm -rf %{_vpath_builddir}
 %{_fillupdir}/sysconfig.*
 %endif
 %{_unitdir}/ceph.target
+%if 0%{with manpage}
 %{_mandir}/man8/ceph-create-keys.8*
 %{_mandir}/man8/ceph-run.8*
 %{_mandir}/man8/crushtool.8*
 %{_mandir}/man8/osdmaptool.8*
 %{_mandir}/man8/monmaptool.8*
 %{_mandir}/man8/ceph-kvstore-tool.8*
+%endif
 #set up placeholder directories
 %attr(750,ceph,ceph) %dir %{_localstatedir}/lib/ceph/crash
 %attr(750,ceph,ceph) %dir %{_localstatedir}/lib/ceph/crash/posted
@@ -1785,7 +1811,9 @@ exit 0
 
 %files -n cephadm
 %{_sbindir}/cephadm
+%if 0%{with manpage}
 %{_mandir}/man8/cephadm.8*
+%endif
 %attr(0700,cephadm,cephadm) %dir %{_sharedstatedir}/cephadm
 %attr(0700,cephadm,cephadm) %dir %{_sharedstatedir}/cephadm/.ssh
 %config(noreplace) %attr(0600,cephadm,cephadm) %{_sharedstatedir}/cephadm/.ssh/authorized_keys
@@ -1825,6 +1853,7 @@ exit 0
 %dir %{_libdir}/ceph/denc
 %{_libdir}/ceph/denc/denc-mod-*.so
 %{_tmpfilesdir}/ceph-common.conf
+%if 0%{with manpage}
 %{_mandir}/man8/ceph-authtool.8*
 %{_mandir}/man8/ceph-conf.8*
 %{_mandir}/man8/ceph-dencoder.8*
@@ -1845,6 +1874,7 @@ exit 0
 %{_mandir}/man8/rgw-orphan-list.8*
 %{_mandir}/man8/rgw-gap-list.8*
 %{_mandir}/man8/rgw-restore-bucket-index.8*
+%endif
 %dir %{_datadir}/ceph/
 %{_datadir}/ceph/known_hosts_drop.ceph.com
 %{_datadir}/ceph/id_rsa_drop.ceph.com
@@ -1899,7 +1929,9 @@ fi
 
 %files mds
 %{_bindir}/ceph-mds
+%if 0%{with manpage}
 %{_mandir}/man8/ceph-mds.8*
+%endif
 %{_unitdir}/ceph-mds@.service
 %{_unitdir}/ceph-mds.target
 %attr(750,ceph,ceph) %dir %{_localstatedir}/lib/ceph/mds
@@ -2085,7 +2117,9 @@ fi
 %files mon
 %{_bindir}/ceph-mon
 %{_bindir}/ceph-monstore-tool
+%if 0%{with manpage}
 %{_mandir}/man8/ceph-mon.8*
+%endif
 %{_unitdir}/ceph-mon@.service
 %{_unitdir}/ceph-mon.target
 %attr(750,ceph,ceph) %dir %{_localstatedir}/lib/ceph/mon
@@ -2130,15 +2164,21 @@ fi
 
 %files fuse
 %{_bindir}/ceph-fuse
+%if 0%{with manpage}
 %{_mandir}/man8/ceph-fuse.8*
+%endif
 %{_sbindir}/mount.fuse.ceph
+%if 0%{with manpage}
 %{_mandir}/man8/mount.fuse.ceph.8*
+%endif
 %{_unitdir}/ceph-fuse@.service
 %{_unitdir}/ceph-fuse.target
 
 %files -n cephfs-mirror
 %{_bindir}/cephfs-mirror
+%if 0%{with manpage}
 %{_mandir}/man8/cephfs-mirror.8*
+%endif
 %{_unitdir}/cephfs-mirror@.service
 %{_unitdir}/cephfs-mirror.target
 
@@ -2183,11 +2223,15 @@ fi
 
 %files -n rbd-fuse
 %{_bindir}/rbd-fuse
+%if 0%{with manpage}
 %{_mandir}/man8/rbd-fuse.8*
+%endif
 
 %files -n rbd-mirror
 %{_bindir}/rbd-mirror
+%if 0%{with manpage}
 %{_mandir}/man8/rbd-mirror.8*
+%endif
 %{_unitdir}/ceph-rbd-mirror@.service
 %{_unitdir}/ceph-rbd-mirror.target
 
@@ -2228,7 +2272,9 @@ fi
 
 %files immutable-object-cache
 %{_bindir}/ceph-immutable-object-cache
+%if 0%{with manpage}
 %{_mandir}/man8/ceph-immutable-object-cache.8*
+%endif
 %{_unitdir}/ceph-immutable-object-cache@.service
 %{_unitdir}/ceph-immutable-object-cache.target
 
@@ -2269,7 +2315,9 @@ fi
 
 %files -n rbd-nbd
 %{_bindir}/rbd-nbd
+%if 0%{with manpage}
 %{_mandir}/man8/rbd-nbd.8*
+%endif
 %dir %{_libexecdir}/rbd-nbd
 %{_libexecdir}/rbd-nbd/rbd-nbd_quiesce
 
@@ -2280,8 +2328,10 @@ fi
 %{_bindir}/radosgw-es
 %{_bindir}/radosgw-object-expirer
 %{_bindir}/rgw-policy-check
+%if 0%{with manpage}
 %{_mandir}/man8/radosgw.8*
 %{_mandir}/man8/rgw-policy-check.8*
+%endif
 %dir %{_localstatedir}/lib/ceph/radosgw
 %{_unitdir}/ceph-radosgw@.service
 %{_unitdir}/ceph-radosgw.target
@@ -2328,9 +2378,11 @@ fi
 %{_bindir}/ceph-objectstore-tool
 %{_bindir}/ceph-osd
 %{_libexecdir}/ceph/ceph-osd-prestart.sh
+%if 0%{with manpage}
 %{_mandir}/man8/ceph-clsinfo.8*
 %{_mandir}/man8/ceph-osd.8*
 %{_mandir}/man8/ceph-bluestore-tool.8*
+%endif
 %{_unitdir}/ceph-osd@.service
 %{_unitdir}/ceph-osd.target
 %attr(750,ceph,ceph) %dir %{_localstatedir}/lib/ceph/osd
@@ -2383,8 +2435,10 @@ fi
 %dir %{python3_sitelib}/ceph_volume
 %{python3_sitelib}/ceph_volume/*
 %{python3_sitelib}/ceph_volume-*
+%if 0%{with manpage}
 %{_mandir}/man8/ceph-volume.8*
 %{_mandir}/man8/ceph-volume-systemd.8*
+%endif
 %{_unitdir}/ceph-volume@.service
 
 %post volume
@@ -2451,7 +2505,9 @@ fi
 %{_libdir}/librados_tp.so
 %endif
 %{_bindir}/librados-config
+%if 0%{with manpage}
 %{_mandir}/man8/librados-config.8*
+%endif
 
 %files -n libradospp-devel
 %dir %{_includedir}/rados
@@ -2591,13 +2647,17 @@ fi
 %files -n cephfs-shell
 %{python3_sitelib}/cephfs_shell-*.egg-info
 %{_bindir}/cephfs-shell
+%if 0%{with manpage}
 %{_mandir}/man8/cephfs-shell.8*
+%endif
 %endif
 
 %files -n cephfs-top
 %{python3_sitelib}/cephfs_top-*.egg-info
 %{_bindir}/cephfs-top
+%if 0%{with manpage}
 %{_mandir}/man8/cephfs-top.8*
+%endif
 
 %if 0%{with ceph_test_package}
 %files -n ceph-test
@@ -2625,7 +2685,9 @@ fi
 %if 0%{with crimson}
 %{_bindir}/crimson-store-nbd
 %endif
+%if 0%{with manpage}
 %{_mandir}/man8/ceph-debugpack.8*
+%endif
 %dir %{_libdir}/ceph
 %{_libdir}/ceph/ceph-monstore-update-crush.sh
 %endif
@@ -2654,7 +2716,9 @@ fi
 %files selinux
 %attr(0600,root,root) %{_datadir}/selinux/packages/ceph.pp
 %{_datadir}/selinux/devel/include/contrib/ceph.if
+%if 0%{with manpage}
 %{_mandir}/man8/ceph_selinux.8*
+%endif
 
 %post selinux
 # backup file_contexts before update
