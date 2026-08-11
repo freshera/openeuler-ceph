@@ -8,7 +8,9 @@ dnf update -y
 
 
 # 解决openeuler没有python命令的问题
-ln -s /usr/bin/python3 /usr/bin/python
+if [ ! -e /usr/bin/python ]; then
+    ln -s /usr/bin/python3 /usr/bin/python
+fi
 
 # 设置github代理
 export http_proxy=http://22.129.24.90:10808
@@ -53,6 +55,8 @@ chmod a+x make-dist
 dnf install -y cmake gcc-c++ openssl-devel zlib-devel \
   c-ares-devel re2-devel protobuf-devel protobuf-compiler
 cd /usr/local/src
+export http_proxy=http://22.129.24.90:10808
+export https_proxy=http://22.129.24.90:10808
 git clone -b v1.62.1 --depth 1 https://github.com/grpc/grpc
 cd grpc
 git submodule update --init --recursive
@@ -101,7 +105,7 @@ cp -r openeuler-ceph ceph-srpm
 cd ceph-srpm
 export http_proxy=http://22.129.24.90:10808
 export https_proxy=http://22.129.24.90:10808
-./make-srpm.sh v20.3.2
+./make-srpm.sh 20.3.2
 
 # 编译出rpm安装包
 rm -rf /root/rpmbuild/*
