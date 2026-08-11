@@ -13,7 +13,8 @@ dnf install -y rpm-build rpmdevtools cmake gcc-c++ \
 rm -rf ~/rpmbuild 
 cd ~
 rpmdev-setuptree
-dnf download --source grpc
+#dnf download --source grpc
+wget https://dl-cdn.openeuler.openatom.cn/openEuler-24.03-LTS-SP4/source/Packages/grpc-1.60.0-5.oe2403sp4.src.rpm
 rpm -ivh grpc-1.60.0-*.src.rpm
 rm -rf ~/rpmbuild/SPECS/grpc.spec
 cd -
