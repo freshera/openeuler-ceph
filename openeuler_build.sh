@@ -52,39 +52,39 @@ chmod a+x make-dist
 
 
 # 编译安装grpc
-dnf install -y cmake gcc-c++ openssl-devel zlib-devel \
-  c-ares-devel re2-devel protobuf-devel protobuf-compiler
-cd /usr/local/src
-export http_proxy=http://22.129.24.90:10808
-export https_proxy=http://22.129.24.90:10808
-git clone -b v1.62.1 --depth 1 https://github.com/grpc/grpc
-cd grpc
-git submodule update --init --recursive
-dnf install -y abseil-cpp-devel
-rm -rf cmake/build && mkdir -p cmake/build && cd cmake/build
-cmake ../.. \
-  -GNinja \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=/opt/grpc \
-  -DCMAKE_PREFIX_PATH=/usr \
-  -DgRPC_INSTALL=ON \
-  -DgRPC_BUILD_TESTS=OFF \
-  -DgRPC_PROTOBUF_PROVIDER=package \
-  -DgRPC_ABSL_PROVIDER=package \
-  -DgRPC_CARES_PROVIDER=package \
-  -DgRPC_RE2_PROVIDER=package \
-  -DgRPC_SSL_PROVIDER=package \
-  -DgRPC_ZLIB_PROVIDER=package \
-  -DgRPC_BUILD_GRPC_CPP_PLUGIN=ON \
-  -DgRPC_BUILD_GRPC_PYTHON_PLUGIN=OFF \
-  -DgRPC_BUILD_GRPC_CSHARP_PLUGIN=OFF \
-  -DgRPC_BUILD_GRPC_NODE_PLUGIN=OFF \
-  -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN=OFF \
-  -DgRPC_BUILD_GRPC_PHP_PLUGIN=OFF \
-  -DgRPC_BUILD_GRPC_RUBY_PLUGIN=OFF \
-  -DCMAKE_CXX_STANDARD=17
-ninja -j"$(nproc)"
-ninja install
+# dnf install -y cmake gcc-c++ openssl-devel zlib-devel \
+#   c-ares-devel re2-devel protobuf-devel protobuf-compiler
+# cd /usr/local/src
+# export http_proxy=http://22.129.24.90:10808
+# export https_proxy=http://22.129.24.90:10808
+# git clone -b v1.62.1 --depth 1 https://github.com/grpc/grpc
+# cd grpc
+# git submodule update --init --recursive
+# dnf install -y abseil-cpp-devel
+# rm -rf cmake/build && mkdir -p cmake/build && cd cmake/build
+# cmake ../.. \
+#   -GNinja \
+#   -DCMAKE_BUILD_TYPE=Release \
+#   -DCMAKE_INSTALL_PREFIX=/opt/grpc \
+#   -DCMAKE_PREFIX_PATH=/usr \
+#   -DgRPC_INSTALL=ON \
+#   -DgRPC_BUILD_TESTS=OFF \
+#   -DgRPC_PROTOBUF_PROVIDER=package \
+#   -DgRPC_ABSL_PROVIDER=package \
+#   -DgRPC_CARES_PROVIDER=package \
+#   -DgRPC_RE2_PROVIDER=package \
+#   -DgRPC_SSL_PROVIDER=package \
+#   -DgRPC_ZLIB_PROVIDER=package \
+#   -DgRPC_BUILD_GRPC_CPP_PLUGIN=ON \
+#   -DgRPC_BUILD_GRPC_PYTHON_PLUGIN=OFF \
+#   -DgRPC_BUILD_GRPC_CSHARP_PLUGIN=OFF \
+#   -DgRPC_BUILD_GRPC_NODE_PLUGIN=OFF \
+#   -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN=OFF \
+#   -DgRPC_BUILD_GRPC_PHP_PLUGIN=OFF \
+#   -DgRPC_BUILD_GRPC_RUBY_PLUGIN=OFF \
+#   -DCMAKE_CXX_STANDARD=17
+# ninja -j"$(nproc)"
+# ninja install
 
 
 # 使用cmake编译

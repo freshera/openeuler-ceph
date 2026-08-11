@@ -103,8 +103,8 @@ ARGS+=" -DWITH_MANPAGE=OFF"
 ARGS+=" -DCMAKE_BUILD_TYPE=RelWithDebInfo"
 ARGS+=" -DWITH_SPDK=ON"
 ARGS+=" -DWITH_CRIMSON=OFF"
-ARGS+=" -DgRPC_DIR=/opt/grpc/lib64/cmake/grpc"
-ARGS+=" -DCMAKE_PREFIX_PATH=/opt/grpc"
+# ARGS+=" -DgRPC_DIR=/opt/grpc/lib64/cmake/grpc"
+# ARGS+=" -DCMAKE_PREFIX_PATH=/opt/grpc"
 
 
 mkdir $BUILD_DIR
