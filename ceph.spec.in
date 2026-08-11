@@ -250,7 +250,8 @@ BuildRequires:	gperf
 BuildRequires:  cmake > 3.5
 BuildRequires:	fuse-devel
 BuildRequires:	git
-#BuildRequires:	grpc-devel
+BuildRequires:	grpc-devel
+BuildRequires:	grpc-plugins
 # Before 13.3, an lto bug resulted in a segfault in SafeTimer and perhaps
 # elsewhere. Require the fixed version so we can reenable lto. See
 # ceph bug https://tracker.ceph.com/issues/63867
@@ -665,6 +666,7 @@ Group:		System/Filesystems
 %endif
 Provides:	ceph-test:/usr/bin/ceph-nvmeof-monitor-client
 Requires:	librados2 = %{_epoch_prefix}%{version}-%{release}
+Requires:	grpc
 %description mon-client-nvmeof
 Ceph NVMeoF Gateway Monitor Client distributes Paxos ANA info
 to NVMeoF Gateway and provides beacons to the monitor daemon
@@ -1469,8 +1471,6 @@ cmake .. \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DWITH_SPDK:BOOL=ON \
     -DWITH_CRIMSON:BOOL=OFF \
-    -DgRPC_DIR=/opt/grpc/lib64/cmake/grpc \
-    -DCMAKE_PREFIX_PATH=/opt/grpc \
     -DWITH_NVMEOF_GATEWAY_MONITOR_CLIENT=ON \
     -DWITH_JAEGER:BOOL=OFF \
 %endif
