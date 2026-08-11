@@ -132,14 +132,17 @@ if [ ! -s "${SPEC_FILE}" ];then
 fi
 echo "spec已提取：${SPEC_FILE}"
 
+# 修改依赖包的版本
+sed -i 's/libcephfs-devel >= 10.2.0/libcephfs-devel >= v20.3.2/' "${SPEC_FILE}"
+sed -i 's/librados-devel >= 0.61/librados-devel >= v20.3.2/' "${SPEC_FILE}"
 
 # 修改spec文件，增加如下信息 745 行
 #%{python3_sitelib}/ganesha_top-*.egg
 #%{_libexecdir}/ganesha/__pycache__/*.pyc
 #%{_libdir}/ganesha/libfsalsaunafs.so
-sed -i '905d' "${SPEC_FILE}"
-sed -i '745a\%{python3_sitelib}/ganesha_top-*.egg\n%{_libexecdir}/ganesha/__pycache__/*.pyc' "${SPEC_FILE}"
-sed -i '745a\%{_libdir}/ganesha/libfsalsaunafs.so' "${SPEC_FILE}"
+sed -i '900d' "${SPEC_FILE}"
+sed -i '747a\%{python3_sitelib}/ganesha_top-*.egg\n%{_libexecdir}/ganesha/__pycache__/*.pyc' "${SPEC_FILE}"
+sed -i '747a\%{_libdir}/ganesha/libfsalsaunafs.so' "${SPEC_FILE}"
 
 rpmbuild -ba "${SPEC_FILE}"
 
@@ -153,68 +156,3 @@ echo "所有RPM包已复制至 /opt/ganesha-rpm-output"
 ls -lh /opt/ganesha-rpm-output/*.rpm
 echo "====================================="
 # =================================================================
-
-# 7. 本地系统安装
-echo "===== [7] 本地安装nfs-ganesha ====="
-ninja install
-cp /usr/local/src/nfs-ganesha/src/scripts/systemd/ganesha.service /usr/lib/systemd/system/
-systemctl daemon-reload
-mkdir -p /etc/ganesha /var/run/ganesha /var/log/ganesha
-
-# 8. 写入CephFS默认导出配置
-cat > /etc/ganesha/ganesha.conf << 'EOF'
-NFS_CORE_PARAM {
-    NFS_Protocols = 3,4;
-    fsid_device = true;
-    Bind_addr = 0.0.0.0;
-    Manage_Gids = true;
-}
-NFSV4 {
-    Graceless = true;
-    Minor_Versions = 1,2;
-}
-LOG {
-    Default_Log_Level = WARN;
-    Components {
-        ALL = EVENT;
-        CEPH = DEBUG;
-        NFSv4 = INFO;
-    }
-}
-EXPORT {
-    Export_Id = 1;
-    Path = "/";
-    Pseudo = "/cephfs";
-    Access_Type = RW;
-    Squash = No_Root_Squash;
-    SecType = sys;
-    Protocols = 3,4;
-    Transports = TCP;
-    FSAL {
-        Name = CEPH;
-        User_Id = "admin";
-        Ceph_Conf = "/etc/ceph/ceph.conf";
-    }
-}
-EXPORT_DEFAULTS {
-    Protocols = 3,4;
-    Transports = TCP;
-    SecType = sys;
-    Squash = No_Root_Squash;
-}
-EOF
-
-# 9. 完成汇总提示
-echo -e "\n=============================================="
-echo "nfs-ganesha V7.3 编译+RPM打包全部完成"
-echo "主程序路径：$(which ganesha.nfsd)"
-echo "配置文件：/etc/ganesha/ganesha.conf"
-echo "RPM包存放：/opt/ganesha-rpm-output"
-echo "服务管理："
-echo "  systemctl start ganesha"
-echo "  systemctl enable ganesha"
-echo "  journalctl -u ganesha -f"
-echo "离线部署最小安装：dnf install /opt/ganesha-rpm-output/nfs-ganesha-7.3*.rpm /opt/ganesha-rpm-output/nfs-ganesha-ceph-7.3*.rpm"
-echo "客户端挂载示例：mount -t nfs4 <ganesha_ip>:/cephfs /mnt/nfs -o rw,noatime"
-echo "=============================================="
-echo "=============================================="
