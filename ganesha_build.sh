@@ -42,8 +42,8 @@ dnf install -y git cmake gcc gcc-c++ make ninja-build autoconf automake libtool 
 python3 python3-devel openssl-devel krb5-devel libuuid-devel nfs-utils userspace-rcu-devel \
 dbus-devel dbus-c++-devel libnsl2-devel libtirpc-devel libnl3-devel libcap-devel libblkid-devel \
 audit-libs-devel protobuf-devel protobuf-c protobuf-c-devel libacl-devel \
-libmount-devel json-c-devel systemd-devel rpm-build rpmlint tar xz createrepo
-mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+libmount-devel json-c-devel systemd-devel rpm-build rpmlint tar xz createrepo \
+doxygen libxslt xmlto rpmdevtools
 
 # 3. 拉取nfs-ganesha V7.3源码
 echo "===== [3] 拉取nfs-ganesha V7.3源码 ====="
@@ -64,13 +64,14 @@ mkdir -p /usr/local/src/nfs-ganesha/build
 cd /usr/local/src/nfs-ganesha/build
 cmake ../src \
   -GNinja \
-  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DCMAKE_INSTALL_PREFIX=/usr \
   -DSYSCONF_INSTALL_DIR=/etc \
   -DRPMBUILD_ROOT=${HOME}/rpmbuild \
   -DGANESHA_VERSION_NUM=7.3 \
   -DUSE_GRPC=OFF \
   -DUSE_FSAL_CEPH=ON \
+  -DBUILD_DOCUMENTATION=ON \
   -DUSE_FSAL_RGW=OFF \
   -DUSE_FSAL_VFS=ON \
   -DUSE_FSAL_LUSTRE=OFF \
@@ -112,13 +113,36 @@ if ! tar -tzf "${TAR_FILE}" >/dev/null; then
 fi
 echo "tar包校验通过，开始构建rpm"
 
-echo "===== 构建RPM，屏蔽pyc生成+清理多余文件 ====="
-rpmbuild -ta \
-    --nodeps \
-    --define "_unpackaged_files_terminate_build 0" \
-    --define "__brp_python_bytecompile %{nil}" \
-    --define '__spec_install_post rm -rf %{buildroot}/usr/libexec/ganesha/__pycache__; rm -rf %{buildroot}/usr/lib64/ganesha/libfsalsaunafs.so; rm -rf %{buildroot}/usr/lib/python3*/site-packages/*.egg *.egg-info; rm -rf %{buildroot}/usr/lib/python3*/site-packages/Ganesha; rm -rf %{buildroot}/usr/lib/python3*/site-packages/ganeshactl*' \
-    "${TAR_FILE}"
+echo "===== 清理旧rpmbuild缓存 ====="
+rm -rf ~/rpmbuild
+mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+
+# 移动源码压缩包到rpmbuild SOURCES目录
+mv -f "${TAR_FILE}" ~/rpmbuild/SOURCES/
+TAR_FILE=~/rpmbuild/SOURCES/nfs-ganesha-7.3.tar.gz
+echo "源码包已移动至：${TAR_FILE}"
+SPEC_FILE=~/rpmbuild/SPECS/nfs-ganesha-7.3.spec
+
+# 直接从压缩包取出已经生成好的nfs‑ganesha.spec
+tar -Oxzf "${TAR_FILE}" nfs-ganesha-7.3/nfs-ganesha.spec > "${SPEC_FILE}"
+
+if [ ! -s "${SPEC_FILE}" ];then
+    echo "ERROR: 提取spec失败"
+    exit 1
+fi
+echo "spec已提取：${SPEC_FILE}"
+
+
+# 修改spec文件，增加如下信息 745 行
+#%{python3_sitelib}/ganesha_top-*.egg
+#%{_libexecdir}/ganesha/__pycache__/*.pyc
+#%{_libdir}/ganesha/libfsalsaunafs.so
+sed -i '905d' "${SPEC_FILE}"
+sed -i '745a\%{python3_sitelib}/ganesha_top-*.egg\n%{_libexecdir}/ganesha/__pycache__/*.pyc' "${SPEC_FILE}"
+sed -i '745a\%{_libdir}/ganesha/libfsalsaunafs.so' "${SPEC_FILE}"
+
+rpmbuild -ba "${SPEC_FILE}"
+
 
 # 归集所有rpm包到统一输出目录
 rm -rf /opt/ganesha-rpm-output
