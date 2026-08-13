@@ -25,3 +25,6 @@ rpmbuild -ba ~/rpmbuild/SPECS/grpc.spec
 
 # 4. 检查cmake
 rpm -qlp ~/rpmbuild/RPMS/$(uname -m)/grpc-devel-1.60.0-5.1*.rpm | grep gRPCConfig
+
+# 5 安装grpc 
+dnf install -y ~/rpmbuild/RPMS/$(uname -m)/grpc*.rpm --allowerasing

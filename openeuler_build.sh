@@ -79,7 +79,8 @@ chmod a+x make-dist
 # ninja -j"$(nproc)"
 # ninja install
 
-
+# 编译并安装grpc
+./grpc_build.sh
 # 使用cmake编译
 export http_proxy=http://22.129.24.90:10808
 export https_proxy=http://22.129.24.90:10808
