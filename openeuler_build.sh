@@ -23,6 +23,7 @@ if [ ! -e /usr/bin/python ]; then
     ln -s /usr/bin/python3 /usr/bin/python
 fi
 pip3 install jsonnet asyncssh
+dnf install -y python3-packaging
 # 安装 libnbd-devel，暂时用rocky9的
 export base_arch="`arch`"
 wget http://10.20.81.5/yum/rocky9/${base_arch}/crb/Packages/l/libnbd-devel-1.20.2-2.el9.${base_arch}.rpm
