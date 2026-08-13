@@ -2,15 +2,6 @@
 ##在openeuler 24.03环境编译ceph，并制作出rpm包
 ##############################################
 
-# 安装基础包
-dnf install -y git g++ python3 python3-devel python3-pip rpm-build npm
-dnf update -y
-
-
-# 解决openeuler没有python命令的问题
-if [ ! -e /usr/bin/python ]; then
-    ln -s /usr/bin/python3 /usr/bin/python
-fi
 
 # 设置github代理
 export http_proxy=http://22.129.24.90:10808
@@ -20,29 +11,31 @@ git clone https://github.com/freshera/openeuler-ceph
 cd openeuler-ceph
 git checkout v20.2.3
 git switch -c v20.2.3 origin/v20.2.3
-
-export http_proxy=
-export https_proxy=
-# 补齐python依赖（测试用）
-pip3 install jsonnet asyncssh
-
-
 # 源码文件转化
 yum install -y dos2unix && find . | xargs dos2unix
 
+
+# 安装基础包
+dnf install -y git g++ python3 python3-devel python3-pip rpm-build npm
+dnf update -y
+# 解决openeuler没有python命令的问题
+if [ ! -e /usr/bin/python ]; then
+    ln -s /usr/bin/python3 /usr/bin/python
+fi
+pip3 install jsonnet asyncssh
 # 安装 libnbd-devel，暂时用rocky9的
 export base_arch="`arch`"
 wget http://10.20.81.5/yum/rocky9/${base_arch}/crb/Packages/l/libnbd-devel-1.20.2-2.el9.${base_arch}.rpm
 wget http://10.20.81.5/yum/rocky9/${base_arch}/appstream/Packages/l/libnbd-1.20.2-2.el9.${base_arch}.rpm
 rpm -ivh libnbd-devel-1.20.2-2.el9.${base_arch}.rpm libnbd-1.20.2-2.el9.${base_arch}.rpm
-rm -rf libnbd-devel-1.20.2-2.el9.${base_arch}.rpm libnbd-1.20.2-2.el9.${base_arch}.rpm
-
+# rm -rf libnbd-devel-1.20.2-2.el9.${base_arch}.rpm libnbd-1.20.2-2.el9.${base_arch}.rpm
 # 安装依赖包（适配openeuler）
 chmod a+x *.sh
 chmod a+x cmake/modules/*.sh
 chmod a+x -R */*.sh */*/*.sh
 chmod a+x make-dist
 ./install-deps.sh
+
 
 # 安装ceph-nvmeof-monitor-client依赖包 （先检查一下gRPCConfig.cmake和grpc-config.cmake）
 # protobuf直接装, grpc系统自带的不含cmake config,需编译安装
