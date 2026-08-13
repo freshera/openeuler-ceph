@@ -136,6 +136,9 @@ echo "spec已提取：${SPEC_FILE}"
 sed -i 's/libcephfs-devel >= 10.2.0/libcephfs-devel >= v20.3.2/' "${SPEC_FILE}"
 sed -i 's/librados-devel >= 0.61/librados-devel >= v20.3.2/' "${SPEC_FILE}"
 
+# 修改RPM包版本号
+sed -i 's/^Version:\s*7\.3$/Version:\t7.3.ideal.oe2403sp4/' "${SPEC_FILE}"
+
 # 修改spec文件，增加如下信息 745 行
 #%{python3_sitelib}/ganesha_top-*.egg
 #%{_libexecdir}/ganesha/__pycache__/*.pyc

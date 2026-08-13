@@ -105,7 +105,7 @@ export https_proxy=http://22.129.24.90:10808
 # 编译出rpm安装包
 rm -rf /root/rpmbuild/*
 mkdir -p /root/rpmbuild/{SPECS,SOURCES}
-cp ceph-v20.2.3.tar.bz2  /root/rpmbuild/SOURCES
+cp ceph-20.2.3.tar.bz2  /root/rpmbuild/SOURCES
 cp ceph.spec  /root/rpmbuild/SPECS
 export http_proxy=http://22.129.24.90:10808
 export https_proxy=http://22.129.24.90:10808
