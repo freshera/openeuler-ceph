@@ -92,9 +92,10 @@ for i in $(seq 20 -1 11); do
 done
 ARGS+=" -DCMAKE_CXX_COMPILER=$cxx_compiler"
 ARGS+=" -DCMAKE_C_COMPILER=$c_compiler"
-# Keep in sync with ceph.spec.in %if 0%{?openEuler} cmake args / bconds.
+# Keep in sync with ceph.spec.in openEuler cmake args / bconds.
 # Dashboard frontend / tests / jaeger / lttng / babeltrace / manpage: leave
 # unset so CMake option() defaults apply (all ON).
+# SELinux / OCF / Grafana: CMake defaults are OFF; force ON to match RPM packaging.
 ARGS+=" -DWITH_NVMEOF_GATEWAY_MONITOR_CLIENT=ON"
 # ARGS+=" -DWITH_MGR_DASHBOARD_FRONTEND=OFF"
 # ARGS+=" -DWITH_TESTS=OFF"
@@ -105,6 +106,9 @@ ARGS+=" -DWITH_NVMEOF_GATEWAY_MONITOR_CLIENT=ON"
 ARGS+=" -DCMAKE_BUILD_TYPE=RelWithDebInfo"
 ARGS+=" -DWITH_SPDK=ON"
 ARGS+=" -DWITH_CRIMSON=OFF"
+ARGS+=" -DWITH_SELINUX=ON"
+ARGS+=" -DWITH_OCF=ON"
+ARGS+=" -DWITH_GRAFANA=ON"
 # ARGS+=" -DgRPC_DIR=/opt/grpc/lib64/cmake/grpc"
 # ARGS+=" -DCMAKE_PREFIX_PATH=/opt/grpc"
 
