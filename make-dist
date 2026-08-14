@@ -22,16 +22,17 @@ fi
 # ---------------------------------------------------------------------------
 # Optional knobs (override on the command line, e.g. SKIP_PMDK=0 ./make-dist ...)
 #
-# Defaults match a lean local/RPM build (see do_cmake.sh):
-#   -DWITH_MGR_DASHBOARD_FRONTEND=OFF  -> skip npm dashboard (biggest time sink)
-#   -DWITH_BLUESTORE_PMEM=OFF / no RWL -> skip bundling PMDK
+# Defaults aligned with do_cmake.sh / ceph.spec.in (openEuler):
+#   WITH_MGR_DASHBOARD_FRONTEND=ON  -> build frontend into the tarball (SKIP_DASHBOARD=0)
+#   WITH_BLUESTORE_PMEM / RBD_RWL off on aarch64 lean path -> skip bundling PMDK
+#     (x86_64 with RWL on: use SKIP_PMDK=0 or system PMDK)
 # Boost is still required (system openEuler Boost is often < 1.87).
 # liburing stays bundled unless you use -DWITH_SYSTEM_LIBURING=ON in cmake/spec.
 #
 # CACHE_DIR: successful downloads are stored here and reused when SHA256 matches,
 # so repeated make-dist runs do not re-wget Boost/liburing/pmdk.
 # ---------------------------------------------------------------------------
-: "${SKIP_DASHBOARD_FRONTEND:=1}"
+: "${SKIP_DASHBOARD_FRONTEND:=0}"
 : "${SKIP_PMDK:=1}"
 : "${SKIP_LIBURING:=0}"
 : "${SKIP_ROOK_CLIENT:=0}"
@@ -261,7 +262,7 @@ else
 fi
 
 if [ "$SKIP_DASHBOARD_FRONTEND" = 1 ]; then
-    echo "skipping dashboard frontend build (SKIP_DASHBOARD_FRONTEND=1); matches WITH_MGR_DASHBOARD_FRONTEND=OFF"
+    echo "skipping dashboard frontend build (SKIP_DASHBOARD_FRONTEND=1)"
 else
     build_dashboard_frontend
     ordered_tarballs+=(dashboard_frontend)
@@ -288,4 +289,5 @@ bzip2 -9 $outfile.tar
 
 echo "done."
 echo "created: $outfile.tar.bz2"
-echo "hint: full upstream bundle: SKIP_DASHBOARD_FRONTEND=0 SKIP_PMDK=0 ./make-dist $version"
+echo "hint: faster tarball (no dashboard npm): SKIP_DASHBOARD_FRONTEND=1 ./make-dist $version"
+echo "hint: include PMDK (x86_64 RWL/PMEM): SKIP_PMDK=0 ./make-dist $version"
