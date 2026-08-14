@@ -22,14 +22,9 @@
 #################################################################################
 %bcond_with make_check
 %bcond_with cmake_verbose_logging
-# openEuler lean build (aligned with do_cmake.sh): skip ceph-test by default
-%if 0%{?openEuler}
-%bcond_with ceph_test_package
-%bcond_with manpage
-%else
+# Match CMake defaults / do_cmake.sh: ceph-test and manpages on by default
 %bcond_without ceph_test_package
 %bcond_without manpage
-%endif
 %ifarch s390
 %bcond_with tcmalloc
 %else
@@ -54,12 +49,8 @@
 %bcond_without selinux
 %bcond_without amqp_endpoint
 %bcond_without kafka_endpoint
-# openEuler: LTTNG/BABELTRACE off by default (matches do_cmake.sh)
-%if 0%{?openEuler}
-%bcond_with lttng
-%else
+# Match CMake defaults / do_cmake.sh: LTTNG + BABELTRACE on by default
 %bcond_without lttng
-%endif
 %bcond_without libradosstriper
 %bcond_without ocf
 %global luarocks_package_name luarocks
@@ -104,9 +95,10 @@
 %endif
 %endif
 %bcond_with crimson
-%if 0%{?suse_version} || 0%{?openEuler}
+%if 0%{?suse_version}
 %bcond_with jaeger
 %else
+# Match CMake default / do_cmake.sh: jaeger on (fedora/rhel/openEuler)
 %bcond_without jaeger
 %endif
 %if 0%{?fedora} || 0%{?suse_version} >= 1500 || 0%{?rhel} >= 9
@@ -365,7 +357,7 @@ BuildRequires:  flex
 %if 0%{?fedora} || 0%{?rhel}
 BuildRequires:  json-devel
 %endif
-%if 0%{?suse_version}
+%if 0%{?suse_version} || 0%{?openEuler}
 BuildRequires:  nlohmann_json-devel
 %endif
 BuildRequires:  libevent-devel
@@ -1472,7 +1464,6 @@ cmake .. \
     -DWITH_SPDK:BOOL=ON \
     -DWITH_CRIMSON:BOOL=OFF \
     -DWITH_NVMEOF_GATEWAY_MONITOR_CLIENT=ON \
-    -DWITH_JAEGER:BOOL=OFF \
 %endif
 %if 0%{?gts_version} == 13
     -DCMAKE_EXE_LINKER_FLAGS=-lstdc++ \
@@ -1494,7 +1485,7 @@ cmake .. \
     -DWITH_MANPAGE:BOOL=OFF \
 %endif
     -DWITH_PYTHON3:STRING=%{python3_version} \
-    -DWITH_MGR_DASHBOARD_FRONTEND:BOOL=OFF \
+    -DWITH_MGR_DASHBOARD_FRONTEND:BOOL=ON \
 %if 0%{?suse_version}
     -DWITH_RADOSGW_SELECT_PARQUET:BOOL=OFF \
 %endif
