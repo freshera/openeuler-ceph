@@ -101,6 +101,12 @@ cd ceph-srpm
 export http_proxy=http://22.129.24.90:10808
 export https_proxy=http://22.129.24.90:10808
 ./make-srpm.sh 20.2.3
+# 检查依赖包
+rm -rf /root/rpmbuild
+rpmdev-setuptree
+rpm -ivh ceph-20.2.3*.src.rpm
+dnf builddep -y ~/rpmbuild/SPECS/ceph.spec
+
 
 # 编译出rpm安装包
 rm -rf /root/rpmbuild/*
