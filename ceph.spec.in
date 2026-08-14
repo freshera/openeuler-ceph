@@ -357,8 +357,11 @@ BuildRequires:  flex
 %if 0%{?fedora} || 0%{?rhel}
 BuildRequires:  json-devel
 %endif
-%if 0%{?suse_version} || 0%{?openEuler}
+%if 0%{?suse_version}
 BuildRequires:  nlohmann_json-devel
+%endif
+%if 0%{?openEuler}
+BuildRequires:  nlohmann-json-devel
 %endif
 BuildRequires:  libevent-devel
 %endif
