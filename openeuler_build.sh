@@ -16,7 +16,7 @@ unset http_proxy https_proxy
 yum install -y dos2unix && find . | xargs dos2unix
 
 
-# 安装基础包
+# 安装基础包 (*************使用本地源openEuler***********)
 dnf install -y git g++ python3 python3-devel python3-pip rpm-build npm
 dnf update -y
 # 解决openeuler没有python命令的问题
@@ -36,6 +36,7 @@ chmod a+x *.sh
 chmod a+x cmake/modules/*.sh
 chmod a+x -R */*.sh */*/*.sh
 chmod a+x make-dist
+# (*************使用本地源openEuler***********)
 ./install-deps.sh
 
 
@@ -105,6 +106,9 @@ ninja -j64
 ninja install
 
 # 编译前端
+cd ~/openeuler-ceph
+export http_proxy=http://22.129.24.90:10808
+export https_proxy=http://22.129.24.90:10808
 cd src/pybind/mgr/dashboard/frontend
 npm ci
 DASHBOARD_FRONTEND_LANGS="zh-Hans" npm run build:localize -- --configuration production
@@ -135,7 +139,7 @@ rm -rf /root/rpmbuild/*
 mkdir -p /root/rpmbuild/{SPECS,SOURCES}
 cp ceph-20.2.3.tar.bz2  /root/rpmbuild/SOURCES
 cp ceph.spec  /root/rpmbuild/SPECS
-sed -i '212s/dist}/dist}.ideal.oe2403sp4/g' /root/rpmbuild/SPECS/ceph.spec
+sed -i '200s/dist}/dist}.ideal.oe2403sp4/g' /root/rpmbuild/SPECS/ceph.spec
 export http_proxy=http://22.129.24.90:10808
 export https_proxy=http://22.129.24.90:10808
 rpmbuild -ba /root/rpmbuild/SPECS/ceph.spec
