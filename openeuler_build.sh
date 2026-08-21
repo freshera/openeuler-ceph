@@ -11,6 +11,7 @@ git clone https://github.com/freshera/openeuler-ceph
 cd openeuler-ceph
 git checkout v20.2.3
 git switch -c v20.2.3 origin/v20.2.3
+unset http_proxy https_proxy
 # 源码文件转化
 yum install -y dos2unix && find . | xargs dos2unix
 
@@ -96,6 +97,7 @@ export http_proxy=http://22.129.24.90:10808
 export https_proxy=http://22.129.24.90:10808
 rm -rf build
 ./do_cmake.sh
+unset http_proxy https_proxy
 
 # 源码编译和安装
 cd build
@@ -110,6 +112,7 @@ cd ceph-srpm
 export http_proxy=http://22.129.24.90:10808
 export https_proxy=http://22.129.24.90:10808
 ./make-srpm.sh 20.2.3
+unset http_proxy https_proxy
 # 检查依赖包
 rm -rf /root/rpmbuild
 rpmdev-setuptree
@@ -126,6 +129,7 @@ sed -i '212s/dist}/dist}.ideal.oe2403sp4/g' /root/rpmbuild/SPECS/ceph.spec
 export http_proxy=http://22.129.24.90:10808
 export https_proxy=http://22.129.24.90:10808
 rpmbuild -ba /root/rpmbuild/SPECS/ceph.spec
+unset http_proxy https_proxy
 
 #####################################################
 # run-make-check开发人员用来做完整编译 + 单元测试 + 格式检查
