@@ -81,7 +81,16 @@ chmod a+x make-dist
 # ninja install
 
 # 编译并安装grpc
+# 方法1
 ./grpc_build.sh
+
+# 方法2
+## 当前2403 sp4版本的grpc已经正确替代，直接安装部署包即可 (需要使用本地源)
+### 修改openEuler.repo为本地源
+#dnf clean all
+#dnf install -y python3-grpcio grpc-devel grpc grpc-plugins
+
+
 # 使用cmake编译
 export http_proxy=http://22.129.24.90:10808
 export https_proxy=http://22.129.24.90:10808
