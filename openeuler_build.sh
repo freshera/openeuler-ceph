@@ -97,9 +97,9 @@ export http_proxy=http://22.129.24.90:10808
 export https_proxy=http://22.129.24.90:10808
 rm -rf build
 ./do_cmake.sh
-unset http_proxy https_proxy
 
-# 源码编译和安装
+
+# 源码编译和安装 (需要连接github)
 cd build
 ninja -j64
 ninja install
