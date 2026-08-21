@@ -102,6 +102,16 @@ cd build
 ninja -j64
 ninja install
 
+# 编译前端
+cd src/pybind/mgr/dashboard/frontend
+npm ci
+DASHBOARD_FRONTEND_LANGS="zh-Hans" npm run build:localize -- --configuration production
+rm -rf dist/en-US
+ls dist/zh-Hans
+
+# 查错
+grep -nE 'error:|fatal error:|undefined reference|Error 1|FAILED:|ninja: build stopped' /var/log/ceph/build.log 
+
 # 编译出rpm包
 cd ../
 rm -rf ceph-srpm
