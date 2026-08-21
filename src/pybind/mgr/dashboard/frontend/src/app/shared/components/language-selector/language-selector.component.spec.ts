@@ -26,6 +26,7 @@ describe('LanguageSelectorComponent', () => {
   });
 
   it('should read current language', () => {
+    // Unit tests run without --localize; Angular LOCALE_ID defaults to en-US.
     expect(component.selectedLanguage).toBe('en-US');
   });
 
@@ -35,51 +36,7 @@ describe('LanguageSelectorComponent', () => {
     expect(cookie.length).toBe(1);
   };
 
-  it('should change to cs', () => {
-    expectLanguageChange('cs');
-  });
-
-  it('should change to de', () => {
-    expectLanguageChange('de');
-  });
-
-  it('should change to es', () => {
-    expectLanguageChange('es');
-  });
-
-  it('should change to fr', () => {
-    expectLanguageChange('fr');
-  });
-
-  it('should change to id', () => {
-    expectLanguageChange('id');
-  });
-
-  it('should change to it', () => {
-    expectLanguageChange('it');
-  });
-
-  it('should change to ja', () => {
-    expectLanguageChange('ja');
-  });
-
-  it('should change to ko', () => {
-    expectLanguageChange('ko');
-  });
-
-  it('should change to pl', () => {
-    expectLanguageChange('pl');
-  });
-
-  it('should change to pt', () => {
-    expectLanguageChange('pt');
-  });
-
   it('should change to zh-Hans', () => {
     expectLanguageChange('zh-Hans');
-  });
-
-  it('should change to zh-Hant', () => {
-    expectLanguageChange('zh-Hant');
   });
 });

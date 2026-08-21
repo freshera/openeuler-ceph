@@ -10,52 +10,8 @@
           "baseHref": ""
         },
         "locales": {
-          "cs": {
-            "translation": "src/locale/messages.cs.xlf",
-            "baseHref": ""
-          },
-          "de": {
-            "translation": "src/locale/messages.de-DE.xlf",
-            "baseHref": ""
-          },
-          "es": {
-            "translation": "src/locale/messages.es-ES.xlf",
-            "baseHref": ""
-          },
-          "fr": {
-            "translation": "src/locale/messages.fr-FR.xlf",
-            "baseHref": ""
-          },
-          "id": {
-            "translation": "src/locale/messages.id-ID.xlf",
-            "baseHref": ""
-          },
-          "it": {
-            "translation": "src/locale/messages.it-IT.xlf",
-            "baseHref": ""
-          },
-          "ja": {
-            "translation": "src/locale/messages.ja-JP.xlf",
-            "baseHref": ""
-          },
-          "ko": {
-            "translation": "src/locale/messages.ko-KR.xlf",
-            "baseHref": ""
-          },
-          "pl": {
-            "translation": "src/locale/messages.pl-PL.xlf",
-            "baseHref": ""
-          },
-          "pt": {
-            "translation": "src/locale/messages.pt-BR.xlf",
-            "baseHref": ""
-          },
           "zh-Hans": {
             "translation": "src/locale/messages.zh-CN.xlf",
-            "baseHref": ""
-          },
-          "zh-Hant": {
-            "translation": "src/locale/messages.zh-TW.xlf",
             "baseHref": ""
           }
         }
@@ -133,69 +89,14 @@
                 }
               ]
             },
-            "cs": {
-              "localize": [
-                "cs"
-              ]
-            },
-            "de": {
-              "localize": [
-                "de"
-              ]
-            },
             "en-US": {
               "localize": [
                 "en-US"
               ]
             },
-            "es": {
-              "localize": [
-                "es"
-              ]
-            },
-            "fr": {
-              "localize": [
-                "fr"
-              ]
-            },
-            "id": {
-              "localize": [
-                "id"
-              ]
-            },
-            "it": {
-              "localize": [
-                "it"
-              ]
-            },
-            "ja": {
-              "localize": [
-                "ja"
-              ]
-            },
-            "ko": {
-              "localize": [
-                "ko"
-              ]
-            },
-            "pl": {
-              "localize": [
-                "pl"
-              ]
-            },
-            "pt": {
-              "localize": [
-                "pt"
-              ]
-            },
             "zh-Hans": {
               "localize": [
                 "zh-Hans"
-              ]
-            },
-            "zh-Hant": {
-              "localize": [
-                "zh-Hant"
               ]
             }
           },
@@ -211,44 +112,11 @@
             "production": {
               "buildTarget": "ceph-dashboard:build:production"
             },
-            "cs": {
-              "buildTarget": "ceph-dashboard:build:cs"
-            },
-            "de": {
-              "buildTarget": "ceph-dashboard:build:de"
-            },
             "en-US": {
               "buildTarget": "ceph-dashboard:build:en-US"
             },
-            "es": {
-              "buildTarget": "ceph-dashboard:build:es"
-            },
-            "fr": {
-              "buildTarget": "ceph-dashboard:build:fr"
-            },
-            "id": {
-              "buildTarget": "ceph-dashboard:build:id"
-            },
-            "it": {
-              "buildTarget": "ceph-dashboard:build:it"
-            },
-            "ja": {
-              "buildTarget": "ceph-dashboard:build:ja"
-            },
-            "ko": {
-              "buildTarget": "ceph-dashboard:build:ko"
-            },
-            "pl": {
-              "buildTarget": "ceph-dashboard:build:pl"
-            },
-            "pt": {
-              "buildTarget": "ceph-dashboard:build:pt"
-            },
             "zh-Hans": {
               "buildTarget": "ceph-dashboard:build:zh-Hans"
-            },
-            "zh-Hant": {
-              "buildTarget": "ceph-dashboard:build:zh-Hant"
             }
           }
         },
