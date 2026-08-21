@@ -63,7 +63,7 @@ macro(build_spdk)
     # unset $LDFLAGS, otherwise SPDK will fail to mock some functions.
     # Quote EXTRA_CFLAGS so multiple -W flags remain a single make argument.
     BUILD_COMMAND env -i "PATH=$ENV{PATH}" "CC=${CMAKE_C_COMPILER}"
-      make "EXTRA_CFLAGS=${spdk_CFLAGS}"
+      make "EXTRA_CFLAGS=${spdk_CFLAGS}" CONFIG_TESTS=n
     BUILD_IN_SOURCE 1
     BUILD_BYPRODUCTS ${spdk_libs}
     INSTALL_COMMAND ""
