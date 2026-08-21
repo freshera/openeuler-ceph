@@ -41,9 +41,9 @@ chmod a+x make-dist
 
 # 安装ceph-nvmeof-monitor-client依赖包 （先检查一下gRPCConfig.cmake和grpc-config.cmake）
 # protobuf直接装, grpc系统自带的不含cmake config,需编译安装
-# dnf install -y protobuf-devel protobuf-compiler grpc-devel
-# find /usr -name 'gRPCConfig.cmake'
-# find /usr -name 'grpc-config.cmake'
+dnf install -y protobuf-devel protobuf-compiler grpc-devel
+find /usr -name 'gRPCConfig.cmake'
+find /usr -name 'grpc-config.cmake'
 
 
 # 编译安装grpc
