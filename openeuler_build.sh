@@ -91,6 +91,22 @@ find /usr -name 'grpc-config.cmake'
 #dnf clean all
 #dnf install -y python3-grpcio grpc-devel grpc grpc-plugins
 
+# 打开CRIMSON
+dnf install -y \
+  gcc-toolset-14-gcc gcc-toolset-14-gcc-c++ \
+  gcc-toolset-14-libgcc gcc-toolset-14-libstdc++ \
+  gcc-toolset-14-libstdc++-devel gcc-toolset-14-libatomic-devel
+
+dnf install -y \
+  gnutls-devel lksctp-tools-devel yaml-cpp-devel ragel \
+  c-ares-devel hwloc-devel libpciaccess-devel \
+  systemtap-sdt-devel protobuf-devel protobuf-compiler \
+  libubsan libasan
+
+source /opt/openEuler/gcc-toolset-14/enable
+rm -rf build
+# 确保 -DWITH_CRIMSON=ON
+./do_cmake.sh
 
 # 使用cmake编译
 export http_proxy=http://22.129.24.90:10808
