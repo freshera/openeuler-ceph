@@ -7,6 +7,7 @@
 export http_proxy=http://22.129.24.90:10808
 export https_proxy=http://22.129.24.90:10808
 # 下载ceph源码
+dnf install -y wget git
 git clone https://github.com/freshera/openeuler-ceph
 cd openeuler-ceph
 git checkout v20.2.3
@@ -30,7 +31,7 @@ export base_arch="`arch`"
 wget http://10.20.81.5/yum/rocky9/${base_arch}/crb/Packages/l/libnbd-devel-1.20.2-2.el9.${base_arch}.rpm
 wget http://10.20.81.5/yum/rocky9/${base_arch}/appstream/Packages/l/libnbd-1.20.2-2.el9.${base_arch}.rpm
 rpm -ivh libnbd-devel-1.20.2-2.el9.${base_arch}.rpm libnbd-1.20.2-2.el9.${base_arch}.rpm
-# rm -rf libnbd-devel-1.20.2-2.el9.${base_arch}.rpm libnbd-1.20.2-2.el9.${base_arch}.rpm
+rm -rf libnbd-devel-1.20.2-2.el9.${base_arch}.rpm libnbd-1.20.2-2.el9.${base_arch}.rpm
 # 安装依赖包（适配openeuler）
 chmod a+x *.sh
 chmod a+x cmake/modules/*.sh
@@ -92,22 +93,22 @@ find /usr -name 'grpc-config.cmake'
 #dnf clean all
 #dnf install -y python3-grpcio grpc-devel grpc grpc-plugins
 
-# 打开CRIMSON
-dnf install -y \
-  gcc-toolset-14-gcc gcc-toolset-14-gcc-c++ \
-  gcc-toolset-14-libgcc gcc-toolset-14-libstdc++ \
-  gcc-toolset-14-libstdc++-devel gcc-toolset-14-libatomic-devel
-
-dnf install -y \
-  gnutls-devel lksctp-tools-devel yaml-cpp-devel ragel \
-  c-ares-devel hwloc-devel libpciaccess-devel \
-  systemtap-sdt-devel protobuf-devel protobuf-compiler \
-  libubsan libasan
-
-source /opt/openEuler/gcc-toolset-14/enable
-rm -rf build
-# 确保 -DWITH_CRIMSON=ON
-./do_cmake.sh
+## 打开CRIMSON
+#dnf install -y \
+#  gcc-toolset-14-gcc gcc-toolset-14-gcc-c++ \
+#  gcc-toolset-14-libgcc gcc-toolset-14-libstdc++ \
+#  gcc-toolset-14-libstdc++-devel gcc-toolset-14-libatomic-devel
+#
+#dnf install -y \
+#  gnutls-devel lksctp-tools-devel yaml-cpp-devel ragel \
+#  c-ares-devel hwloc-devel libpciaccess-devel \
+#  systemtap-sdt-devel protobuf-devel protobuf-compiler \
+#  libubsan libasan
+#
+#source /opt/openEuler/gcc-toolset-14/enable
+#rm -rf build
+## 确保 -DWITH_CRIMSON=ON
+#./do_cmake.sh
 
 # 使用cmake编译
 export http_proxy=http://22.129.24.90:10808
@@ -135,6 +136,7 @@ ls dist/zh-Hans
 grep -nE 'error:|fatal error:|undefined reference|Error 1|FAILED:|ninja: build stopped' /var/log/ceph/build.log 
 
 # 编译出rpm包
+cd ~/openeuler-ceph
 cd ../
 rm -rf ceph-srpm
 cp -r openeuler-ceph ceph-srpm
